@@ -1,7 +1,15 @@
-use std::io::{self, BufRead};
+use std::io::{self, Read, Write};
+use termion::raw::IntoRawMode;
 
 fn main() {
-    for line in io::stdin().lock().lines() {
-        println!("{}", line.unwrap());
+    let mut stdout = io::stdout().into_raw_mode().unwrap();
+
+    for b in io::stdin().bytes() {
+        let c = b.unwrap() as char;
+        println!("{}\r", c);
+        if c == 'q' {
+            break;
+        }
     }
+    writeln!(stdout, "Hello, world!").unwrap();
 }
