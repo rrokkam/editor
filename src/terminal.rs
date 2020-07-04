@@ -6,7 +6,7 @@ use termion::input::TermRead;
 use termion::raw::{IntoRawMode, RawTerminal};
 
 pub struct Terminal {
-    _width: u16,
+    width: u16,
     height: u16,
     stdout: RawTerminal<Stdout>,
 }
@@ -17,18 +17,17 @@ impl Terminal {
         let stdout = io::stdout().into_raw_mode()?;
         Terminal::clear_screen()?;
         let terminal = Self {
-            _width: width,
+            width,
             height,
             stdout,
         };
-        print!("{}", termion::cursor::Goto(1, 1));
         Ok(terminal)
     }
 
     pub fn print_buffer(&mut self, buffer: &Buffer) -> Result<(), std::io::Error> {
         for i in 0..self.height {
             if let Some(row) = buffer.row(i as usize) {
-                println!("{}\r", row);
+                println!("{}\r", &row[0..std::cmp::min(row.len(), self.width as usize)]);
             }
         }
         print!("{}\r", termion::cursor::Goto(1, 1));
