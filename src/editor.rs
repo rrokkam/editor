@@ -2,8 +2,6 @@ use crate::buffer::Buffer;
 use crate::terminal::Terminal;
 use termion::event::Key;
 
-/// Current row and column of the cursor in the file, which may be different in the future from the
-/// current x/y position of the cursor in the terminal!!
 #[derive(Clone, Copy, Default)]
 pub struct Position {
     row: usize,
@@ -27,12 +25,7 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub fn new() -> Result<Self, std::io::Error> {
-        let buffer = match std::env::args().nth(1) {
-            Some(filename) => Buffer::open(&filename)?,
-            None => Buffer::default(),
-        };
-
+    pub fn new(buffer: Buffer) -> Result<Self, std::io::Error> {
         Ok(Editor {
             terminal: Terminal::new()?,
             buffer,

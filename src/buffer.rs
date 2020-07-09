@@ -1,18 +1,29 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-#[derive(Default)]
 pub struct Buffer {
     lines: Vec<String>,
+    name: String,
 }
 
 impl Buffer {
-    pub fn open(filename: &str) -> Result<Self, std::io::Error> {
+    pub fn new(name: String) -> Result<Self, std::io::Error> {
         Ok(Buffer {
-            lines: BufReader::new(File::open(filename)?)
-                .lines()
-                .collect::<Result<_, _>>()?,
+            lines: Self::open_file(&name)?,
+            name,
         })
+    }
+
+    /// open returns Err if the file contains invalid UTF-8.
+    fn open_file(name: &str) -> Result<Vec<String>, std::io::Error> {
+        Ok(match File::open(&name) {
+            Ok(file) => BufReader::new(file).lines().collect::<Result<_, _>>()?,
+            Err(_) => Vec::new(),
+        })
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn row(&self, index: usize) -> Option<&String> {

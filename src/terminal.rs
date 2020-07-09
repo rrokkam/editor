@@ -27,7 +27,10 @@ impl Terminal {
     pub fn print_buffer(&mut self, buffer: &Buffer) -> Result<(), std::io::Error> {
         for i in 0..self.height {
             if let Some(row) = buffer.row(i as usize) {
-                println!("{}\r", &row[0..std::cmp::min(row.len(), self.width as usize)]);
+                println!(
+                    "{}\r",
+                    &row[0..std::cmp::min(row.len(), self.width as usize)]
+                );
             }
         }
         print!("{}\r", termion::cursor::Goto(1, 1));
