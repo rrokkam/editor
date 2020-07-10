@@ -14,17 +14,20 @@ pub struct Terminal {
 impl Terminal {
     pub fn new() -> Result<Self, std::io::Error> {
         let (width, height) = termion::terminal_size()?;
-        let stdout = io::stdout().into_raw_mode()?;
-        Terminal::clear_screen()?;
-        let terminal = Self {
+        let mut terminal = Self {
             width,
             height,
-            stdout,
+            stdout: io::stdout().into_raw_mode()?,
         };
+        terminal.clear_screen();
         Ok(terminal)
     }
 
-    pub fn print_buffer(&mut self, buffer: &Buffer) -> Result<(), std::io::Error> {
+    pub fn key(&self) -> Result<Key, std::io::Error> {
+        io::stdin().keys().next().unwrap()
+    }
+
+    pub fn render(&mut self, buffer: &Buffer) -> Result<(), std::io::Error> {
         for i in 0..self.height {
             if let Some(row) = buffer.row(i as usize) {
                 println!(
@@ -38,25 +41,16 @@ impl Terminal {
     }
 
     pub fn refresh(&mut self, position: &Position) -> Result<(), std::io::Error> {
-        print!("{}", termion::cursor::Hide);
         print!(
-            "{}",
-            termion::cursor::Goto(1 + position.col() as u16, 1 + position.row() as u16)
+            "{}{}{}",
+            termion::cursor::Hide,
+            termion::cursor::Goto(1 + position.col() as u16, 1 + position.row() as u16),
+            termion::cursor::Show
         );
-        print!("{}", termion::cursor::Show);
         self.stdout.flush()
     }
 
-    pub fn clear_screen() -> Result<(), std::io::Error> {
+    pub fn clear_screen(&mut self) {
         print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
-        io::stdout().flush()
-    }
-
-    pub fn read_key(&self) -> Result<Key, std::io::Error> {
-        loop {
-            if let Some(key) = io::stdin().lock().keys().next() {
-                return key;
-            }
-        }
     }
 }

@@ -22,6 +22,10 @@ impl Buffer {
         })
     }
 
+    pub fn save(&self) {
+        // save to a file
+    }
+
     pub fn name(&self) -> &str {
         &self.name
     }

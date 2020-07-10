@@ -12,5 +12,5 @@ pub fn main() -> Result<(), std::io::Error> {
 
     let buffer = Buffer::new(filename)?;
 
-    Editor::new(buffer)?.run()
+    Editor::new(buffer).run()
 }

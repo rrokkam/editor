@@ -25,34 +25,28 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub fn new(buffer: Buffer) -> Result<Self, std::io::Error> {
-        Ok(Editor {
-            terminal: Terminal::new()?,
+    pub fn new(buffer: Buffer) -> Self {
+        Editor {
+            terminal: Terminal::new().unwrap(),
             buffer,
             cursor_position: Position::default(),
-        })
+        }
     }
 
     pub fn run(&mut self) -> Result<(), std::io::Error> {
-        self.terminal.print_buffer(&self.buffer)?;
+        self.terminal.render(&self.buffer)?;
         loop {
-            let key = self.terminal.read_key()?;
-            let done = self.on_keypress(key);
-            if done {
-                Terminal::clear_screen()?;
-                return Ok(());
+            let key = self.terminal.key().unwrap();
+            match key {
+                Key::Char(c) if !c.is_control() => println!("{}\r", c),
+                Key::Up | Key::Down | Key::Left | Key::Right => self.move_cursor(key),
+                Key::Ctrl('s') => self.buffer.save(),
+                _ => break,
             }
             self.terminal.refresh(&self.cursor_position)?;
         }
-    }
-
-    fn on_keypress(&mut self, key: Key) -> bool {
-        match key {
-            Key::Char(c) if !c.is_control() => println!("{}\r", c),
-            Key::Up | Key::Down | Key::Left | Key::Right => self.move_cursor(key),
-            _ => return true,
-        }
-        false
+        self.terminal.clear_screen();
+        Ok(())
     }
 
     fn move_cursor(&mut self, key: Key) {
