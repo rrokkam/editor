@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use crate::editor::Position;
 
 pub struct Buffer {
     lines: Vec<String>,
@@ -22,9 +23,11 @@ impl Buffer {
         })
     }
 
-    pub fn save(&self) {
-        // save to a file
+    pub fn write(&mut self, c: char, position: &Position) {
+        print!("{}", c);
+
     }
+
 
     pub fn name(&self) -> &str {
         &self.name

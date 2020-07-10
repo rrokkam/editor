@@ -27,7 +27,12 @@ impl Terminal {
         io::stdin().keys().next().unwrap()
     }
 
-    pub fn render(&mut self, buffer: &Buffer) -> Result<(), std::io::Error> {
+    pub fn render(&mut self, buffer: &Buffer, cursor: &Position) -> Result<(), std::io::Error> {
+        print!(
+            "{}{}",
+            termion::cursor::Hide,
+            termion::cursor::Goto(1, 1),
+        );
         for i in 0..self.height {
             if let Some(row) = buffer.row(i as usize) {
                 println!(
@@ -36,17 +41,12 @@ impl Terminal {
                 );
             }
         }
-        print!("{}\r", termion::cursor::Goto(1, 1));
-        self.stdout.flush()
-    }
-
-    pub fn refresh(&mut self, position: &Position) -> Result<(), std::io::Error> {
         print!(
-            "{}{}{}",
-            termion::cursor::Hide,
-            termion::cursor::Goto(1 + position.col() as u16, 1 + position.row() as u16),
+            "{}{}",
+            termion::cursor::Goto(1 + cursor.col() as u16, 1 + cursor.row() as u16),
             termion::cursor::Show
         );
+
         self.stdout.flush()
     }
 
