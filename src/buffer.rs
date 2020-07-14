@@ -22,7 +22,10 @@ impl Buffer {
     }
 
     pub fn write(&mut self, c: char, position: &Position) {
-        print!("{}", c);
+        let line = self.lines.get(position.row()).unwrap();
+        let new_line =
+            String::new() + &line[..position.col()] + &c.to_string() + &line[position.col() + 1..];
+        self.lines[position.row()] = new_line;
     }
 
     pub fn row(&self, index: usize) -> Option<&String> {
