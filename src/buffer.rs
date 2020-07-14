@@ -1,17 +1,15 @@
+use crate::editor::Position;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use crate::editor::Position;
 
 pub struct Buffer {
     lines: Vec<String>,
-    name: String,
 }
 
 impl Buffer {
     pub fn new(name: String) -> Result<Self, std::io::Error> {
         Ok(Buffer {
             lines: Self::open_file(&name)?,
-            name,
         })
     }
 
@@ -25,12 +23,6 @@ impl Buffer {
 
     pub fn write(&mut self, c: char, position: &Position) {
         print!("{}", c);
-
-    }
-
-
-    pub fn name(&self) -> &str {
-        &self.name
     }
 
     pub fn row(&self, index: usize) -> Option<&String> {

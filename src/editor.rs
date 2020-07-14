@@ -52,7 +52,7 @@ impl Editor {
     pub fn run(mut self) -> Result<(), std::io::Error> {
         self.terminal.clear_screen();
         loop {
-            self.terminal.render(&self.buffer, &self.cursor_position)?;
+            self.render()?;
             let key = self.terminal.key().unwrap();
             match key {
                 Key::Char(c) if !c.is_control() => self.buffer.write(c, &self.cursor_position),
@@ -65,5 +65,21 @@ impl Editor {
         }
         self.terminal.clear_screen();
         Ok(())
+    }
+
+    fn render(&mut self) -> Result<(), std::io::Error> {
+        self.terminal.hide_cursor();
+        self.terminal.move_cursor_to(&Position::default());
+        for i in 0..self.terminal.height() {
+            if let Some(row) = self.buffer.row(i as usize) {
+                println!(
+                    "{}\r",
+                    &row[0..std::cmp::min(row.len(), self.terminal.width() as usize)]
+                );
+            }
+        }
+        self.terminal.move_cursor_to(&self.cursor_position);
+        self.terminal.show_cursor();
+        self.terminal.flush()
     }
 }
