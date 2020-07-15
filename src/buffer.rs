@@ -23,32 +23,29 @@ impl Buffer {
     }
 
     pub fn write(&mut self, c: char, position: &Position) {
-        let empty_line = String::new();
-
-        let line = self.lines.get(position.row()).unwrap_or(&empty_line);
-        let mut new_line = String::new();
-        match line.len().cmp(&position.col()) {
-            Ordering::Less => {
-                new_line += line;
-                //                panic!("got: {} {}", line.len(), position.col());
-                new_line += &" ".repeat(position.col() - line.len());
-                new_line += &c.to_string();
-            }
-            Ordering::Equal => {
-                new_line += line;
-                new_line += &c.to_string();
-            }
-            Ordering::Greater => {
-                new_line += &line[..position.col()];
-                new_line += &c.to_string();
-                new_line += &line[position.col() + 1..];
-            }
-        }
-
         if position.row() >= self.lines.len() {
             self.lines.resize(position.row() + 1, String::new())
         }
-        self.lines[position.row()] = new_line;
+
+        let mut line = self.lines.get(position.row()).unwrap().clone();
+        match line.len().cmp(&position.col()) {
+            Ordering::Less => {
+                line.push_str(&" ".repeat(position.col() - line.len()));
+                line.push(c);
+            }
+            Ordering::Equal => {
+                line.push(c);
+            }
+            Ordering::Greater => {
+                let second_half = line.split_off(position.col());
+                line.push(c);
+                if !second_half.is_empty() {
+                    line.push_str(&second_half[1..]);
+                }
+            }
+        }
+
+        self.lines[position.row()] = line;
     }
 
     pub fn row(&self, index: usize) -> Option<&String> {
