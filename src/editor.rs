@@ -38,6 +38,7 @@ pub struct Editor {
     terminal: Terminal,
     buffer: Buffer,
     cursor_position: Position,
+    offset: Position,
 }
 
 impl Editor {
@@ -46,6 +47,7 @@ impl Editor {
             terminal: Terminal::new().unwrap(),
             buffer,
             cursor_position: Position::default(),
+            offset: Position::default(),
         }
     }
 
@@ -69,17 +71,21 @@ impl Editor {
 
     fn render(&mut self) -> Result<(), std::io::Error> {
         self.terminal.hide_cursor();
+        self.terminal.clear_screen();
         self.terminal.move_cursor_to(&Position::default());
-        for i in 0..self.terminal.height() {
-            if let Some(row) = self.buffer.row(i as usize) {
-                println!(
-                    "{}\r",
-                    &row[0..std::cmp::min(row.len(), self.terminal.width() as usize)]
-                );
-            }
+        for i in 0..self.terminal.height() as usize {
+            self.render_row(i + self.offset.row());
         }
         self.terminal.move_cursor_to(&self.cursor_position);
         self.terminal.show_cursor();
         self.terminal.flush()
+    }
+
+    fn render_row(&self, row: usize) {
+        if let Some(row) = self.buffer.row(row) {
+            let left = std::cmp::min(row.len(), self.offset.col());
+            let right = std::cmp::min(row.len(), left + self.terminal.width() as usize);
+            println!("{}\r", &row[left..right]);
+        }
     }
 }
